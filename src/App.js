@@ -1,13 +1,10 @@
-import './App.css';
-import ReactDOM from "react-dom/client"
-
+import Body from "./components/Body";
 function App() {
   return (
     <div className="App">
-     <h1>NETFLIX-GPT</h1>
+      <Body/>
     </div>
   );
 }
-const root= ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App/>)
+
 export default App;
