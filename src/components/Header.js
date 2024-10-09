@@ -1,15 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { useNavigate ,Link} from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser, removeUser } from "../utils/userSlice";
 import { LOGO, USER_AVATAR } from "../utils/constant";
 
 const Header = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
   const dispatch = useDispatch();
+  const handleMouseEnter = () => setIsOpen(true);
+  const handleMouseLeave = () => setIsOpen(false);
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
@@ -41,24 +44,39 @@ const Header = () => {
     return () => unsubscribe();
   }, []);
   return (
-    <div className=" absolute w-screen px-10 py-2  bg-gradient-to-b from-black z-10 flex justify-between">
+    <div className=" fixed w-screen px-10 py-2  bg-gradient-to-b from-black z-50 flex justify-between">
       <Link to={"/browse"}>
-        <img className="w-48 " alt="Netflix logo" src={LOGO} />
+        <img className="w-32 md:w-48 " alt="Netflix logo" src={LOGO} />
       </Link>
       {user && (
-        <div className="p-2 mt-2 flex   ">
-          <img
-            alt="user logo"
-            className="w-12 h-12 rounded-md  "
-            src={USER_AVATAR}
-          />
-          <div className="mb-3">
-            <button
-              onClick={handleSignOut}
-              className="m-3 bg-red-600 rounded-md p-1  text-white font-semibold pl-2 pr-2 pb-2 "
-            >
-              Sign Out
-            </button>
+        <div className="p-2 mt-2 flex">
+          <div
+            className="relative inline-block cursor-pointer "
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <img
+              src={USER_AVATAR} 
+              alt="User Avatar"
+              className="w-10 h-10 md:w-12 md:h-12 rounded"
+            />
+
+            {/* Dropdown Menu */}
+            {isOpen && (
+              <div className="absolute right-0  mt-2 w-40 bg-black bg-opacity-80 text-white shadow-lg rounded-lg">
+                <ul className="py-2">
+                  <li className="px-4 py-2 hover:text-red-500">Accounts</li>
+                  <li className="px-4 py-2 hover:text-red-500">User</li>
+                  <li className="px-4 py-2 hover:text-red-500">Help</li>
+                  <li
+                    className="px-4 py-2 hover:text-red-500"
+                    onClick={handleSignOut}
+                  >
+                    Sign Out
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       )}
