@@ -5,14 +5,23 @@ import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser, removeUser } from "../utils/userSlice";
 import { LOGO, USER_AVATAR } from "../utils/constant";
+import { toggleGptSearchView } from "../utils/gptSlice";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
+  const { showGptSearch } = useSelector((store) => store.gpt);
+
   const dispatch = useDispatch();
+
   const handleMouseEnter = () => setIsOpen(true);
   const handleMouseLeave = () => setIsOpen(false);
+  const toggleSearch = () => {
+    dispatch(toggleGptSearchView());
+  };
+
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
@@ -24,6 +33,7 @@ const Header = () => {
         // An error happened.
       });
   };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -49,14 +59,23 @@ const Header = () => {
         <img className="w-32 md:w-48 " alt="Netflix logo" src={LOGO} />
       </Link>
       {user && (
-        <div className="p-2 mt-2 flex">
+        <div className="p-2 mt-2 flex ">
+          {/* search button */}
+          <div className="relative mr-4">
+            <button
+              className="py-2 px-4 mx-4 my-2 bg-purple-800 text-white rounded-lg"
+              onClick={toggleSearch}
+            >
+              {showGptSearch ? "Homepage" : "GPT Search"}
+            </button>
+          </div>
           <div
             className="relative inline-block cursor-pointer "
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
             <img
-              src={USER_AVATAR} 
+              src={USER_AVATAR}
               alt="User Avatar"
               className="w-10 h-10 md:w-12 md:h-12 rounded"
             />
