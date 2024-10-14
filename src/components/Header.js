@@ -1,19 +1,31 @@
-import React from "react";
-import { signOut } from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { removeUser } from "../utils/userSlice";
+import { addUser, removeUser } from "../utils/userSlice";
+import { LOGO, USER_AVATAR } from "../utils/constant";
+import { toggleGptSearchView } from "../utils/gptSlice";
 
 const Header = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
-  //   const dispatch = useDispatch();
+  const { showGptSearch } = useSelector((store) => store.gpt);
+
+  const dispatch = useDispatch();
+
+  const handleMouseEnter = () => setIsOpen(true);
+  const handleMouseLeave = () => setIsOpen(false);
+  const toggleSearch = () => {
+    dispatch(toggleGptSearchView());
+  };
+
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
         // dispatch(removeUser())
-        navigate("/");
         // Sign-out successful.
       })
       .catch((error) => {
@@ -21,27 +33,69 @@ const Header = () => {
         // An error happened.
       });
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/auth.user
+        const { uid, email, displayName } = user;
+        dispatch(addUser({ uid: uid, email: email, displayName: displayName }));
+        navigate("/browse");
+        // ...
+      } else {
+        dispatch(removeUser());
+        navigate("/");
+        // User is signed out
+        // ...
+      }
+    });
+    //Unsubscribe when component unmount
+    return () => unsubscribe();
+  }, []);
   return (
-    <div className=" absolute w-screen px-40 py-2  bg-gradient-to-b from-black z-10 flex justify-between">
-      <img
-        className="w-48 "
-        alt="Netflix logo"
-        src="https://cdn.cookielaw.org/logos/dd6b162f-1a32-456a-9cfe-897231c7763c/4345ea78-053c-46d2-b11e-09adaef973dc/Netflix_Logo_PMS.png"
-      />
+    <div className=" fixed w-screen px-10 py-2  bg-gradient-to-b from-black z-50 flex justify-between">
+      <Link to={"/browse"}>
+        <img className="w-32 md:w-48 " alt="Netflix logo" src={LOGO} />
+      </Link>
       {user && (
-        <div className="p-2 mt-2 flex  ">
-          <img
-            alt="user logo"
-            className="w-12 h-12 rounded-md  "
-            src="https://occ-0-6246-2186.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABXz4LMjJFidX8MxhZ6qro8PBTjmHbxlaLAbk45W1DXbKsAIOwyHQPiMAuUnF1G24CLi7InJHK4Ge4jkXul1xIW49Dr5S7fc.png?r=e6e"
-          />
-          <div className="mb-3">
+        <div className="p-2 mt-2 flex ">
+          {/* search button */}
+          <div className="relative mr-4">
             <button
-              onClick={handleSignOut}
-              className="m-3 bg-red-600 rounded-md p-1 text-white font-semibold pl-2 pr-2 pb-2 "
+              className="py-2 px-4 mx-4 my-2 bg-purple-800 text-white rounded-lg"
+              onClick={toggleSearch}
             >
-              Sign Out
+              {showGptSearch ? "Homepage" : "GPT Search"}
             </button>
+          </div>
+          <div
+            className="relative inline-block cursor-pointer "
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <img
+              src={USER_AVATAR}
+              alt="User Avatar"
+              className="w-10 h-10 md:w-12 md:h-12 rounded"
+            />
+
+            {/* Dropdown Menu */}
+            {isOpen && (
+              <div className="absolute right-0  mt-2 w-40 bg-black bg-opacity-80 text-white shadow-lg rounded-lg">
+                <ul className="py-2">
+                  <li className="px-4 py-2 hover:text-red-500">Accounts</li>
+                  <li className="px-4 py-2 hover:text-red-500">User</li>
+                  <li className="px-4 py-2 hover:text-red-500">Help</li>
+                  <li
+                    className="px-4 py-2 hover:text-red-500"
+                    onClick={handleSignOut}
+                  >
+                    Sign Out
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       )}
