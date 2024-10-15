@@ -13,7 +13,6 @@ import { useDispatch } from "react-redux";
 import { BG_URL } from "../utils/constant";
 
 const Login = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSignInForm, setIsSignInFrom] = useState(true);
   const dispatch = useDispatch();
