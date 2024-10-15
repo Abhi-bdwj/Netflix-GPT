@@ -3,7 +3,7 @@ import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { PlayIcon } from "@heroicons/react/24/solid";
 const VideoTitle = ({ title, overview }) => {
   return (
-    <div className="pt-36 px-12 w-screen aspect-video absolute text-white bg-gradient-to-r from-black">
+    <div className="pt-36 px-12 w-full aspect-video absolute text-white bg-gradient-to-r from-black">
       <h1 className="font-bold text-6xl">{title}</h1>
       <p className="py-6 text-lg w-1/4">{overview}</p>
       <div className="">
